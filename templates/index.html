@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flask Video Editing App</title>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+  />
+</head>
+<body class="bg-light">
+  <div class="container my-5">
+    <h1 class="mb-4">Flask Video Editing App</h1>
+
+    <!-- Upload Form -->
+    <form id="upload-form" method="POST" enctype="multipart/form-data">
+      <!-- Hooks -->
+      <div class="form-group">
+        <label><strong>Upload Hooks (MP4, MOV, AVI):</strong></label>
+        <input
+          type="file"
+          name="hooks"
+          multiple
+          class="form-control-file"
+          accept=".mp4,.mov,.avi"
+        />
+      </div>
+
+      <!-- Leads -->
+      <div class="form-group">
+        <label><strong>Upload Leads (MP4, MOV, AVI):</strong></label>
+        <input
+          type="file"
+          name="leads"
+          multiple
+          class="form-control-file"
+          accept=".mp4,.mov,.avi"
+        />
+      </div>
+
+      <!-- Body -->
+      <div class="form-group">
+        <label><strong>Upload Body (MP4, MOV, AVI) - Single File (optional):</strong></label>
+        <input
+          type="file"
+          name="body"
+          class="form-control-file"
+          accept=".mp4,.mov,.avi"
+        />
+      </div>
+
+      <!-- Background Music -->
+      <div class="form-group">
+        <label><strong>Upload Background Music (MP3) - Optional:</strong></label>
+        <input
+          type="file"
+          name="bgmusic"
+          class="form-control-file"
+          accept=".mp3"
+        />
+      </div>
+
+      <!-- Volume Control -->
+      <div class="form-group">
+        <label><strong>Background Music Volume (dB, from -30 to 0):</strong></label>
+        <input
+          type="range"
+          name="bgvolume"
+          min="-30"
+          max="0"
+          step="1"
+          value="-15"
+          oninput="this.nextElementSibling.value=this.value"
+        />
+        <output>-15</output> dB
+      </div>
+
+      <button type="submit" class="btn btn-primary">Generate Videos</button>
+    </form>
+
+    <!-- Download Links -->
+    {% if download_links %}
+      <hr />
+      <h3>Generated Videos:</h3>
+      <ul>
+        {% for link in download_links %}
+          <li>
+            <a href="{{ link.url }}" download>{{ link.filename }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
