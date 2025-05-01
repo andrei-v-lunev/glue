@@ -2,62 +2,165 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Flask Video Editing App</title>
+  <title>Video Glue</title>
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
   />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .progress-container {
+      display: none;
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background-color: #4CAF50;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      margin-top: 10px;
+      text-align: center;
+      color: #666;
+    }
+    .download-links {
+      margin-top: 20px;
+    }
+    .download-links a {
+      display: block;
+      margin: 5px 0;
+      color: #2196F3;
+      text-decoration: none;
+    }
+    .download-links a:hover {
+      text-decoration: underline;
+    }
+    .drop-zone {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+      margin-bottom: 10px;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: #2196F3;
+      background: #e3f2fd;
+    }
+    .drop-zone i {
+      font-size: 2em;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .drop-zone .file-info {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 5px;
+    }
+    .file-list {
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+    .file-list .file-item {
+      display: flex;
+      align-items: center;
+      padding: 5px;
+      background: #fff;
+      border-radius: 4px;
+      margin-bottom: 5px;
+    }
+    .file-list .file-item i {
+      margin-right: 10px;
+      color: #2196F3;
+    }
+    .file-list .remove-file {
+      margin-left: auto;
+      color: #dc3545;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body class="bg-light">
   <div class="container my-5">
-    <h1 class="mb-4">Flask Video Editing App</h1>
+    <h1 class="mb-4">Video Glue</h1>
 
-    <!-- Upload Form -->
-    <form id="upload-form" method="POST" enctype="multipart/form-data">
+    <!-- Error message display -->
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Upload Form - Simplified with direct HTML form submission -->
+    <form id="upload-form" method="POST" enctype="multipart/form-data" action="/">
       <!-- Hooks -->
       <div class="form-group">
-        <label><strong>Upload Hooks (MP4, MOV, AVI):</strong></label>
-        <input
-          type="file"
-          name="hooks"
-          multiple
-          class="form-control-file"
-          accept=".mp4,.mov,.avi"
-        />
+        <label><strong>Upload Hooks (MP4, MOV, AVI) - Optional:</strong></label>
+        <div class="drop-zone" id="hooks-drop-zone">
+          <i class="fas fa-video"></i>
+          <div>Drag and drop hook videos here or click to select</div>
+          <div class="file-info">Supported formats: MP4, MOV, AVI</div>
+          <input type="file" name="hooks" multiple class="d-none" accept=".mp4,.mov,.avi" />
+          <div class="file-list" id="hooks-file-list"></div>
+        </div>
       </div>
 
       <!-- Leads -->
       <div class="form-group">
         <label><strong>Upload Leads (MP4, MOV, AVI):</strong></label>
-        <input
-          type="file"
-          name="leads"
-          multiple
-          class="form-control-file"
-          accept=".mp4,.mov,.avi"
-        />
+        <div class="drop-zone" id="leads-drop-zone">
+          <i class="fas fa-video"></i>
+          <div>Drag and drop lead videos here or click to select</div>
+          <div class="file-info">Supported formats: MP4, MOV, AVI</div>
+          <input type="file" name="leads" multiple class="d-none" accept=".mp4,.mov,.avi" />
+          <div class="file-list" id="leads-file-list"></div>
+        </div>
       </div>
 
       <!-- Body -->
       <div class="form-group">
         <label><strong>Upload Body (MP4, MOV, AVI) - Single File (optional):</strong></label>
-        <input
-          type="file"
-          name="body"
-          class="form-control-file"
-          accept=".mp4,.mov,.avi"
-        />
+        <div class="drop-zone" id="body-drop-zone">
+          <i class="fas fa-video"></i>
+          <div>Drag and drop body video here or click to select</div>
+          <div class="file-info">Supported formats: MP4, MOV, AVI</div>
+          <input type="file" name="body" class="d-none" accept=".mp4,.mov,.avi" />
+          <div class="file-list" id="body-file-list"></div>
+        </div>
       </div>
 
       <!-- Background Music -->
       <div class="form-group">
-        <label><strong>Upload Background Music (MP3) - Optional:</strong></label>
-        <input
-          type="file"
-          name="bgmusic"
-          class="form-control-file"
-          accept=".mp3"
-        />
+        <label><strong>Upload Background Music (MP3, WAV) - Optional:</strong></label>
+        <div class="drop-zone" id="bgmusic-drop-zone">
+          <i class="fas fa-music"></i>
+          <div>Drag and drop background music here or click to select</div>
+          <div class="file-info">Supported formats: MP3, WAV</div>
+          <input type="file" name="bgmusic" class="d-none" accept=".mp3,.wav" />
+          <div class="file-list" id="bgmusic-file-list"></div>
+        </div>
       </div>
 
       <!-- Volume Control -->
@@ -75,24 +178,135 @@
         <output>-15</output> dB
       </div>
 
-      <button type="submit" class="btn btn-primary">Generate Videos</button>
+      <!-- Loop Background Music -->
+      <div class="form-group form-check">
+        <input type="checkbox" class="form-check-input" id="loopBgMusic" name="loop_bg_music">
+        <label class="form-check-label" for="loopBgMusic">Loop background music if shorter than video</label>
+      </div>
+
+      <!-- Direct HTML submit button, no JavaScript handling -->
+      <button type="submit" class="btn btn-primary" id="generateButton">Generate Videos</button>
     </form>
 
     <!-- Download Links -->
     {% if download_links %}
       <hr />
       <h3>Generated Videos:</h3>
-      <ul>
+      <div class="download-links">
         {% for link in download_links %}
-          <li>
-            <a href="{{ link.url }}" download>{{ link.filename }}</a>
-          </li>
+          <a href="{{ link.url }}" download>{{ link.filename }}</a>
         {% endfor %}
-      </ul>
+      </div>
     {% endif %}
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text" id="progressText">Processing: 0%</div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Restore drag and drop functionality while keeping basic form submission
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM fully loaded');
+      
+      // Set up drag and drop functionality
+      const dropZones = document.querySelectorAll('.drop-zone');
+      dropZones.forEach(zone => {
+        const input = zone.querySelector('input[type="file"]');
+        const fileList = zone.querySelector('.file-list');
+
+        // Click to select files
+        zone.addEventListener('click', (e) => {
+          // Prevent clicks on file list from opening file dialog
+          if (e.target.closest('.file-list')) return;
+          input.click();
+        });
+
+        // Handle file selection
+        input.addEventListener('change', () => {
+          console.log(`Files selected for ${input.name}:`, input.files.length);
+          updateFileList(input, fileList);
+        });
+
+        // Drag and drop events
+        zone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          zone.classList.add('dragover');
+        });
+
+        zone.addEventListener('dragleave', () => {
+          zone.classList.remove('dragover');
+        });
+
+        zone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          zone.classList.remove('dragover');
+          input.files = e.dataTransfer.files;
+          console.log(`Files dropped on ${input.name}:`, input.files.length);
+          updateFileList(input, fileList);
+        });
+      });
+
+      // Basic progress checking
+      const form = document.getElementById('upload-form');
+      form.addEventListener('submit', function() {
+        console.log('Form submitted');
+        document.getElementById('progressContainer').style.display = 'block';
+        setTimeout(checkProgress, 1000);
+      });
+    });
+
+    // File list update function with remove button functionality
+    function updateFileList(input, fileList) {
+      fileList.innerHTML = '';
+      Array.from(input.files).forEach(file => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+          <i class="fas ${getFileIcon(file.type)}"></i>
+          <span>${file.name}</span>
+          <i class="fas fa-times remove-file"></i>
+        `;
+        fileList.appendChild(fileItem);
+
+        // Remove file
+        fileItem.querySelector('.remove-file').addEventListener('click', () => {
+          const dt = new DataTransfer();
+          Array.from(input.files).forEach(f => {
+            if (f !== file) dt.items.add(f);
+          });
+          input.files = dt.files;
+          updateFileList(input, fileList);
+        });
+      });
+    }
+
+    function getFileIcon(mimeType) {
+      if (mimeType.startsWith('video/')) return 'fa-video';
+      if (mimeType.startsWith('audio/')) return 'fa-music';
+      return 'fa-file';
+    }
+
+    // Progress checking function
+    function checkProgress() {
+      fetch('/progress')
+        .then(response => response.json())
+        .then(data => {
+          if (data.is_processing) {
+            const progress = data.current;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = data.current_file;
+            setTimeout(checkProgress, 1000);
+          } else {
+            document.getElementById('progressContainer').style.display = 'none';
+          }
+        });
+    }
+  </script>
 </body>
 </html>
